@@ -14,6 +14,8 @@ import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceView;
 
+import androidx.annotation.NonNull;
+
 import com.example.liracast.MainActivity;
 import com.example.liracast.R;
 import com.example.liracast.manager.AsynchronousManager;
@@ -79,20 +81,34 @@ public class CastCore {
                     surface, null, null);
             //mMediaCodec.setInputSurface(surface);
             mMediaCodec.setOutputSurface(mSurfaceView.getHolder().getSurface());
-            mMediaCodec.start();
-            AsynchronousManager.getInstance().postRunnabe(new Runnable() {
+            mMediaCodec.setCallback(new MediaCodec.Callback() {
                 @Override
-                public void run() {
-                    while (true) {
-                        try {
-                            ByteBuffer byteBuffer = mMediaCodec.getOutputBuffer(0);
-                            Log.d(TAG, byteBuffer.toString());
-                        } catch (Exception e) {
-                            Log.d(TAG, e.toString());
-                        }
-                    }
+                public void onInputBufferAvailable(@NonNull MediaCodec codec, int index) {
+
+                }
+
+                @Override
+                public void onOutputBufferAvailable(@NonNull MediaCodec codec, int index, @NonNull MediaCodec.BufferInfo info) {
+                    Log.d(TAG, "onOutputBufferAvailable: ");
+                    ByteBuffer byteBuffer = codec.getOutputBuffer(index);
+                    MediaFormat mediaFormat1 = codec.getOutputFormat(index);
+                    Log.d(TAG, "getOutputBuffer: " + byteBuffer.toString());
+                    Log.d(TAG, "getOutputFormat: " + mediaFormat1.toString());
+                    Log.d(TAG, "BufferInfo: " + info.toString());
+                    codec.releaseOutputBuffer(index, 0);
+                }
+
+                @Override
+                public void onError(@NonNull MediaCodec codec, @NonNull MediaCodec.CodecException e) {
+
+                }
+
+                @Override
+                public void onOutputFormatChanged(@NonNull MediaCodec codec, @NonNull MediaFormat format) {
+
                 }
             });
+            mMediaCodec.start();
         }
     }
 
