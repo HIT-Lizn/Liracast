@@ -91,6 +91,9 @@ public class CastCore {
                 public void onOutputBufferAvailable(@NonNull MediaCodec codec, int index, @NonNull MediaCodec.BufferInfo info) {
                     Log.d(TAG, "onOutputBufferAvailable: ");
                     ByteBuffer byteBuffer = codec.getOutputBuffer(index);
+                    while (byteBuffer.remaining() != 0) {
+                        Log.d(TAG, "OutputBuffer: " + byteBuffer.get());
+                    }
                     MediaFormat mediaFormat1 = codec.getOutputFormat(index);
                     Log.d(TAG, "getOutputBuffer: " + byteBuffer.toString());
                     Log.d(TAG, "getOutputFormat: " + mediaFormat1.toString());
