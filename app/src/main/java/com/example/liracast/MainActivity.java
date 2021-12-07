@@ -12,6 +12,8 @@ import android.content.ServiceConnection;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
 import android.media.MediaCodec;
+import android.media.MediaCodecInfo;
+import android.media.MediaFormat;
 import android.media.projection.MediaProjection;
 import android.media.projection.MediaProjectionManager;
 import android.os.Bundle;
@@ -25,9 +27,12 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.example.liracast.manager.AsynchronousManager;
+import com.example.liracast.net.TCPServier;
 import com.example.liracast.service.ILiracastService;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.ByteBuffer;
 
 public class MainActivity extends AppCompatActivity {
     private final String TAG = "MainActivity";
@@ -41,16 +46,6 @@ public class MainActivity extends AppCompatActivity {
         public void onServiceConnected(ComponentName name, IBinder service) {
             Log.d(TAG, "onServiceConnected");
             mILiracastService = ILiracastService.Stub.asInterface(service);
-            AsynchronousManager.getInstance().postRunnabe(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        mILiracastService.startMirror();
-                    } catch (RemoteException e) {
-                        Log.e(TAG, e.toString());
-                    }
-                }
-            });
         }
 
         @Override
@@ -69,7 +64,80 @@ public class MainActivity extends AppCompatActivity {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(getApplicationContext(), "hahahaha", Toast.LENGTH_SHORT).show();
+                AsynchronousManager.getInstance().postRunnabe(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(getApplicationContext(), "source", Toast.LENGTH_SHORT).show();
+                        try {
+                            mILiracastService.startMirror();
+                        } catch (RemoteException e) {
+                            Log.e(TAG, e.toString());
+                        }
+                    }
+                });
+            }
+        });
+        Button button2 = findViewById(R.id.button2);
+        button2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(getApplicationContext(), "sink", Toast.LENGTH_SHORT).show();
+                /*AsynchronousManager.getInstance().postRunnabe(new Runnable() {
+                    @Override
+                    public void run() {*/
+                        TCPServier tcpServier =  new TCPServier();
+                        try {
+                            MediaCodec mediaCodec = MediaCodec.createDecoderByType(MediaFormat.MIMETYPE_VIDEO_AVC);
+                            MediaFormat mediaFormat = MediaFormat.createVideoFormat(MediaFormat.MIMETYPE_VIDEO_AVC, 360,540);
+                            mediaFormat.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Flexible);
+                            mediaFormat.setInteger(MediaFormat.KEY_BIT_RATE, 64000);
+                            mediaFormat.setInteger(MediaFormat.KEY_FRAME_RATE, 60);
+                            mediaFormat.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 1);
+                            mediaCodec.configure(mediaFormat, mSurfaceView.getHolder().getSurface(), null,0);
+                            mediaCodec.setCallback(new MediaCodec.Callback() {
+                                @Override
+                                public void onInputBufferAvailable(@NonNull MediaCodec codec, int index) {
+
+                                }
+
+                                @Override
+                                public void onOutputBufferAvailable(@NonNull MediaCodec codec, int index, @NonNull MediaCodec.BufferInfo info) {
+                                    Log.d(TAG, "send to surface");
+                                    codec.releaseOutputBuffer(index, true);
+                                }
+
+                                @Override
+                                public void onError(@NonNull MediaCodec codec, @NonNull MediaCodec.CodecException e) {
+
+                                }
+
+                                @Override
+                                public void onOutputFormatChanged(@NonNull MediaCodec codec, @NonNull MediaFormat format) {
+
+                                }
+                            });
+                            mediaCodec.start();
+                            Log.d(TAG, "init codec success");
+                            InputStream inputStream = tcpServier.receive();
+                            Log.d(TAG, "tcp connect success");
+                            while (true) {
+                                byte[] b = new byte[1000];
+                                int size = inputStream.read(b, 0, 1000);
+                                Log.d(TAG, b.toString());
+                                int index = mediaCodec.dequeueInputBuffer(100);
+                                if (index != -1) {
+                                    ByteBuffer byteBuffer = mediaCodec.getInputBuffer(index);
+                                    byteBuffer.put(b);
+                                    Log.d(TAG, byteBuffer.toString());
+                                    mediaCodec.queueInputBuffer(index, 0, size, 0, 0);
+                                }
+                            }
+                        } catch (Exception e) {
+                            Log.e(TAG, e.toString());
+                        }
+                    /*}
+                });*/
+
             }
         });
         AsynchronousManager.getInstance().postRunnabe(new Runnable() {
