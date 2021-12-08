@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Liracast</string>
+    <string name="switch_source">Source</string>
+    <string name="switch_sink">Sink</string>
 </resources>

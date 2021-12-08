@@ -18,11 +18,12 @@ import androidx.annotation.NonNull;
 
 import com.example.liracast.MainActivity;
 import com.example.liracast.R;
+import com.example.liracast.global.Config;
+import com.example.liracast.global.ResourceManager;
 import com.example.liracast.manager.AsynchronousManager;
-import com.example.liracast.net.TCPSender;
+import com.example.liracast.net.tcp.TCPSender;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
@@ -33,21 +34,17 @@ public class CastCore {
     private MediaProjection mMediaProjection;
     private VirtualDisplay mVirtualDisplay;
     private MediaCodec mMediaCodecEn;
-    private MediaCodec mMediaCodecDe;
-    private SurfaceView mSurfaceView;
     private TCPSender mTcpSender;
-    private ArrayList<ByteBuffer> byteBuffers = new ArrayList<>();
 
     public CastCore(Context context) {
         Log.d(TAG, "CastCore");
         mContext = context;
-        mSurfaceView = MainActivity.mSurfaceView;
     }
 
     public void init(Intent intent) {
         Log.d(TAG, "init");
-        Intent data = intent.getParcelableExtra("data");
-        int resultCode = intent.getIntExtra("resultCode", -100);
+        Intent data = intent.getParcelableExtra(Config.SOURCE_INTENT_DATA);
+        int resultCode = intent.getIntExtra(Config.SOURCE_INTENT_RESULTCODE, -100);
         if (data != null && resultCode != -100) {
             mMediaProjectionManager = (MediaProjectionManager)mContext.getSystemService(Context.MEDIA_PROJECTION_SERVICE);
             mMediaProjection = mMediaProjectionManager.getMediaProjection(resultCode, data);
@@ -58,7 +55,7 @@ public class CastCore {
                     Log.d(TAG, t.getName() + t.isEncoder());
                 }
                 mMediaCodecEn = MediaCodec.createEncoderByType(MediaFormat.MIMETYPE_VIDEO_AVC);
-                mMediaCodecDe = MediaCodec.createDecoderByType(MediaFormat.MIMETYPE_VIDEO_AVC);
+
             } catch (IOException e) {
                 Log.e(TAG, e.toString());
             }
@@ -68,10 +65,15 @@ public class CastCore {
     public void startMirror() {
         Log.d(TAG, "startMirror");
         if (mVirtualDisplay == null) {
-            //mTcpSender = new TCPSender();
-            MediaFormat mediaFormat = MediaFormat.createVideoFormat(MediaFormat.MIMETYPE_VIDEO_AVC, 360,540);
+            AsynchronousManager.getInstance().postRunnable2NewThread(new Runnable() {
+                @Override
+                public void run() {
+                    mTcpSender = new TCPSender();
+                }
+            });
+            MediaFormat mediaFormat = MediaFormat.createVideoFormat(MediaFormat.MIMETYPE_VIDEO_AVC, 270,480);
             mediaFormat.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Flexible);
-            mediaFormat.setInteger(MediaFormat.KEY_BIT_RATE, 64000);
+            mediaFormat.setInteger(MediaFormat.KEY_BIT_RATE, 128000);
             mediaFormat.setInteger(MediaFormat.KEY_FRAME_RATE, 60);
             mediaFormat.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 1);
 
@@ -81,8 +83,8 @@ public class CastCore {
                     MediaCodec.CONFIGURE_FLAG_ENCODE);
             Surface surface = mMediaCodecEn.createInputSurface();
             mVirtualDisplay = mMediaProjection.createVirtualDisplay("liracast",
-                    1080,
-                    1920,
+                    270,
+                    480,
                     400,
                     DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC,
                     surface, null, null);
@@ -99,11 +101,9 @@ public class CastCore {
                         public void run() {
                             ByteBuffer byteBuffer = codec.getOutputBuffer(index);
                             Log.d(TAG, "getOutputBuffer: " + byteBuffer.toString());
-                            //mTcpSender.send(byteBuffer);
-                            synchronized (byteBuffers) {
-                                byteBuffers.add(byteBuffer);
+                            if (mTcpSender != null) {
+                                mTcpSender.send(byteBuffer);
                             }
-                            Log.d(TAG, "byteBuffers.add size: " + byteBuffers.size());
                             codec.releaseOutputBuffer(index, 0);
                         }
                     });
@@ -121,51 +121,6 @@ public class CastCore {
             });
 
             mMediaCodecEn.start();
-
-            MediaFormat mediaFormat1 = MediaFormat.createVideoFormat(MediaFormat.MIMETYPE_VIDEO_AVC, 360,540);
-            mMediaCodecDe.configure(mediaFormat1,
-                    mSurfaceView.getHolder().getSurface(),
-                    null,
-                    0);
-            mMediaCodecDe.setCallback(new MediaCodec.Callback() {
-                @Override
-                public void onInputBufferAvailable(@NonNull MediaCodec codec, int index) {
-                    ByteBuffer input = mMediaCodecDe.getInputBuffer(index);
-                    input.clear();
-                    int size = 0;
-                    synchronized (byteBuffers) {
-                        if (!byteBuffers.isEmpty()) {
-                            size = byteBuffers.get(0).remaining();
-                            input.put(byteBuffers.get(0));
-                            byteBuffers.remove(0);
-                            Log.d(TAG, "put buffer: " + input.toString() + " size: " + size);
-                        }
-                    }
-                    codec.queueInputBuffer(index, 0, size, 0, 0);
-                }
-
-                @Override
-                public void onOutputBufferAvailable(@NonNull MediaCodec codec, int index, @NonNull MediaCodec.BufferInfo info) {
-                    AsynchronousManager.getInstance().postRunnabe(new Runnable() {
-                        @Override
-                        public void run() {
-                            Log.d(TAG, "feed to surface");
-                            codec.releaseOutputBuffer(index, true);
-                        }
-                    });
-                }
-
-                @Override
-                public void onError(@NonNull MediaCodec codec, @NonNull MediaCodec.CodecException e) {
-
-                }
-
-                @Override
-                public void onOutputFormatChanged(@NonNull MediaCodec codec, @NonNull MediaFormat format) {
-
-                }
-            });
-            mMediaCodecDe.start();
         }
     }
 

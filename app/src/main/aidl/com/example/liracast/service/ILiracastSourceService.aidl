@@ -1,6 +1,6 @@
 package com.example.liracast.service;
 
-interface ILiracastService {
+interface ILiracastSourceService {
     void startMirror();
     void stopMirror();
 }

@@ -16,8 +16,8 @@ import androidx.core.app.NotificationCompat;
 import com.example.liracast.R;
 import com.example.liracast.engine.CastCore;
 
-public class LiracastService extends Service {
-    private final String TAG = "LiracastService";
+public class LiracastSourceService extends Service {
+    private final String TAG = "LiracastSourceService";
     private IBinder mBinder;
     private CastCore mCastCore;
 
@@ -38,12 +38,12 @@ public class LiracastService extends Service {
             mCastCore.init(intent);
         }
         if (mBinder == null) {
-            mBinder = new LiracastServiceStub();
+            mBinder = new LiracastSourceServiceStub();
         }
         return mBinder;
     }
 
-    private class LiracastServiceStub extends ILiracastService.Stub {
+    private class LiracastSourceServiceStub extends ILiracastSourceService.Stub {
 
         @Override
         public void startMirror() throws RemoteException {

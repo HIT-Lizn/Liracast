@@ -42,13 +42,13 @@ public class AsynchronousManager {
     }
 
     public void postRunnabeDelay(Runnable runnable, long delayTime) {
-        Log.e(TAG, "LelinkDeviceSearch postRunnabeDelay 00");
-        Log.e(TAG, "LelinkDeviceSearch postRunnabeDelay mWorkerHandler = " + mWorkerHandler);
-        Log.e(TAG, "LelinkDeviceSearch postRunnabeDelay runnable = " + runnable);
         if ((runnable != null) && (mWorkerHandler != null)) {
-            Log.e(TAG, "LelinkDeviceSearch postRunnabeDelay");
             mWorkerHandler.postDelayed(runnable, delayTime);
         }
+    }
+
+    public void postRunnable2NewThread(Runnable runnable) {
+        new Thread(runnable).start();
     }
 
     private final class SyncHandler extends Handler {

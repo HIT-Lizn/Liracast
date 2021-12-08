@@ -1,13 +1,10 @@
-package com.example.liracast.net;
+package com.example.liracast.net.tcp;
 
 import android.util.Log;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.ByteBuffer;
 
 public class TCPServier {
     private final String TAG = "TCPServier";
@@ -15,8 +12,9 @@ public class TCPServier {
 
     public InputStream receive() {
         try {
-            mSocket = new ServerSocket(9528);
+            mSocket = new ServerSocket(9529);
             Socket s = mSocket.accept();
+            s.setSoTimeout(5000);
             Log.d(TAG, s.getInetAddress().toString());
             return s.getInputStream();
         } catch (Exception e) {
