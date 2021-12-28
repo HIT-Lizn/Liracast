@@ -33,7 +33,7 @@ public class SinkActivity extends AppCompatActivity {
         setContentView(R.layout.activity_sink);
         mSurfaceView = findViewById(R.id.sink_surfaceview);
 
-        AsynchronousManager.getInstance().postRunnabe(new Runnable() {
+        /*AsynchronousManager.getInstance().postRunnabe(new Runnable() {
             @Override
             public void run() {
                 try {
@@ -117,6 +117,6 @@ public class SinkActivity extends AppCompatActivity {
                 });
                 mMediaCodecDe.start();
             }
-        });
+        });*/
     }
 }

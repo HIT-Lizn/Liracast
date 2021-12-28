@@ -15,6 +15,7 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import com.example.liracast.global.Config;
+import com.example.liracast.global.ResourceManager;
 import com.example.liracast.manager.AsynchronousManager;
 import com.example.liracast.service.ILiracastSourceService;
 
@@ -28,7 +29,7 @@ public class SourceActivity extends AppCompatActivity {
         public void onServiceConnected(ComponentName name, IBinder service) {
             Log.d(TAG, "onServiceConnected");
             mILiracastSourceService = ILiracastSourceService.Stub.asInterface(service);
-            AsynchronousManager.getInstance().postRunnabe(new Runnable() {
+            ResourceManager.getInstance().getAsynchronousManager().postRunnabe(new Runnable() {
                 @Override
                 public void run() {
                     try {
@@ -51,7 +52,7 @@ public class SourceActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_source);
 
-        AsynchronousManager.getInstance().postRunnabe(new Runnable() {
+        ResourceManager.getInstance().getAsynchronousManager().postRunnabe(new Runnable() {
             @Override
             public void run() {
                 getMediaProjection();
@@ -75,7 +76,7 @@ public class SourceActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         Log.d(TAG, "onActivityResult");
         if (requestCode == MEDIAPROJECTION_REQUEST_CODE && resultCode == RESULT_OK) {
-            AsynchronousManager.getInstance().postRunnabe(new Runnable() {
+            ResourceManager.getInstance().getAsynchronousManager().postRunnabe(new Runnable() {
                 @Override
                 public void run() {
                     try {

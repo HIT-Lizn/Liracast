@@ -64,7 +64,7 @@ public class CastCore {
 
     public void startMirror() {
         Log.d(TAG, "startMirror");
-        if (mVirtualDisplay == null) {
+        /*if (mVirtualDisplay == null) {
             AsynchronousManager.getInstance().postRunnable2NewThread(new Runnable() {
                 @Override
                 public void run() {
@@ -121,7 +121,7 @@ public class CastCore {
             });
 
             mMediaCodecEn.start();
-        }
+        }*/
     }
 
     public void stopMirror() {

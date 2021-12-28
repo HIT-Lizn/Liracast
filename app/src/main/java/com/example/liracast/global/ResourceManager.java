@@ -3,6 +3,7 @@ package com.example.liracast.global;
 import android.content.Context;
 import android.view.SurfaceView;
 
+import com.example.liracast.manager.AsynchronousManager;
 import com.example.liracast.net.p2p.P2pAdapter;
 import com.example.liracast.thread.ThreadPoolManager;
 
@@ -13,6 +14,7 @@ public class ResourceManager {
     private SurfaceView mSurfaceView;
     private ThreadPoolManager mThreadPoolManager;
     private P2pAdapter mP2pAdapter;
+    private AsynchronousManager mAsynchronousManager;
 
     public static ResourceManager getInstance() {
         if (sInstance == null) {
@@ -57,5 +59,14 @@ public class ResourceManager {
             }
         }
         return mP2pAdapter;
+    }
+
+    public AsynchronousManager getAsynchronousManager() {
+        synchronized (mAsynchronousManager) {
+            if (mAsynchronousManager == null) {
+                mAsynchronousManager = new AsynchronousManager();
+            }
+        }
+        return mAsynchronousManager;
     }
 }

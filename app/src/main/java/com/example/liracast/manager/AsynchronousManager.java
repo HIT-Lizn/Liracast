@@ -8,23 +8,10 @@ import android.util.Log;
 
 public class AsynchronousManager {
     private final String TAG = "AsynchronousManager";
-    private volatile static AsynchronousManager sInstance;
-
     private HandlerThread mWorkerThread = null;
     private Handler mWorkerHandler = null;
 
-    public static AsynchronousManager getInstance() {
-        if (null == sInstance) {
-            synchronized (AsynchronousManager.class) {
-                if (null == sInstance) {
-                    sInstance = new AsynchronousManager();
-                }
-            }
-        }
-        return sInstance;
-    }
-
-    private AsynchronousManager() {
+    public AsynchronousManager() {
         mWorkerThread = new HandlerThread(TAG);
         mWorkerThread.start();
         Looper looper = mWorkerThread.getLooper();
