@@ -3,11 +3,14 @@ package com.example.liracast.global;
 import android.content.Context;
 import android.view.SurfaceView;
 
+import com.example.liracast.thread.ThreadPoolManager;
+
 public class ResourceManager {
     private final String TAG = "ResourceManager";
     private volatile static ResourceManager sInstance = null;
     private Context mContext;
     private SurfaceView mSurfaceView;
+    private ThreadPoolManager mThreadPoolManager;
 
     public static ResourceManager getInstance() {
         if (sInstance == null) {
@@ -34,5 +37,14 @@ public class ResourceManager {
 
     public SurfaceView getSurfaceView() {
         return mSurfaceView;
+    }
+
+    public ThreadPoolManager getThreadPoolManager() {
+        synchronized (mThreadPoolManager) {
+            if (mThreadPoolManager != null) {
+                mThreadPoolManager = new ThreadPoolManager();
+            }
+        }
+        return mThreadPoolManager;
     }
 }

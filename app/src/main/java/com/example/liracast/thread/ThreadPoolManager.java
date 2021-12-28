@@ -13,18 +13,7 @@ public class ThreadPoolManager {
     private volatile static ThreadPoolManager sInstance = null;
     private ExecutorService mExecutorService;
 
-    public static ThreadPoolManager getInstance() {
-        if (sInstance == null) {
-            synchronized (ThreadPoolManager.class) {
-                if (sInstance == null) {
-                    sInstance = new ThreadPoolManager();
-                }
-            }
-        }
-        return sInstance;
-    }
-
-    private ThreadPoolManager() {
+    public ThreadPoolManager() {
         mExecutorService = new ThreadPoolExecutor(
                 10, 20, 1000, TimeUnit.SECONDS,
                 new ArrayBlockingQueue<>(1024),
