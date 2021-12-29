@@ -3,6 +3,7 @@ package com.example.liracast.net.p2p;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.net.NetworkInfo;
 import android.net.wifi.WpsInfo;
 import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pDevice;
@@ -41,36 +42,33 @@ public class P2pAdapter {
             @Override
             public void callBack(Context context, Intent intent) {
                 Log.d(TAG, "callBack: ");
-                /*switch (action) {
-                case WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION: {
-                    int state = intent.getIntExtra(WifiP2pManager.EXTRA_WIFI_STATE, -100);
-                    break;
-                }
-                case WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION: {
-                    mP2pAdapter.requstPeers();
-                    break;
-                }
-                case WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION: {
-                    NetworkInfo networkInfo = intent.getParcelableExtra(WifiP2pManager.EXTRA_NETWORK_INFO);
-                    if (networkInfo != null) {
-                        Log.d(TAG, "onReceive: " + networkInfo.toString());
-                        if (networkInfo.isConnected()) {
-                            mP2pAdapter.getConnectionInfo();
+                switch (intent.getAction()) {
+                    case WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION: {
+                        int state = intent.getIntExtra(WifiP2pManager.EXTRA_WIFI_STATE, -100);
+                        break;
+                    }
+                    case WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION: {
+                        requstPeers();
+                        break;
+                    }
+                    case WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION: {
+                        NetworkInfo networkInfo = intent.getParcelableExtra(WifiP2pManager.EXTRA_NETWORK_INFO);
+                        if (networkInfo != null) {
+                            Log.d(TAG, "onReceive: " + networkInfo.toString());
+                            if (networkInfo.isConnected()) {
+                                getConnectionInfo();
+                            }
                         }
+                        break;
                     }
-                    break;
-                }
-                case WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION: {
-                    WifiP2pDevice wifiP2pDevice = intent.getParcelableExtra(WifiP2pManager.EXTRA_WIFI_P2P_DEVICE);
-                    if (wifiP2pDevice != null) {
-                        Log.d(TAG, "onReceive: " + wifiP2pDevice.toString());
+                    case WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION: {
+                        WifiP2pDevice wifiP2pDevice = intent.getParcelableExtra(WifiP2pManager.EXTRA_WIFI_P2P_DEVICE);
+                        if (wifiP2pDevice != null) {
+                            Log.d(TAG, "onReceive: " + wifiP2pDevice.toString());
+                        }
+                        break;
                     }
-                    break;
                 }
-            }*/
-
-
-
             }
         });
     }
@@ -106,7 +104,7 @@ public class P2pAdapter {
 
             @Override
             public void onFailure(int reason) {
-                Log.d(TAG, "onFailure: discover");
+                Log.d(TAG, "onFailure: discover: " + reason);
             }
         });
     }

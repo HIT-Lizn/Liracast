@@ -30,7 +30,7 @@ public class WifiP2pBroadcastRecevier extends BroadcastReceiver {
     }
 
     public void setBroadCastCallBack(BroadCastCallBack broadCastCallBack) {
-        synchronized (mBroadCastCallBack) {
+        synchronized (this) {
             mBroadCastCallBack = broadCastCallBack;
         }
     }
@@ -40,7 +40,7 @@ public class WifiP2pBroadcastRecevier extends BroadcastReceiver {
         String action = intent.getAction();
         if (action != null) {
             Log.d(TAG, "onReceive: " + action.toString());
-            synchronized (mBroadCastCallBack) {
+            synchronized (this) {
                 mBroadCastCallBack.callBack(context, intent);
             }
         }

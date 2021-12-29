@@ -3,6 +3,7 @@ package com.example.liracast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.Manifest;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -13,6 +14,7 @@ import com.example.liracast.global.ResourceManager;
 
 public class MainActivity extends AppCompatActivity {
     private final String TAG = "MainActivity";
+    private final int REQUEST_CODE_PERMISSION = 100;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,11 +47,12 @@ public class MainActivity extends AppCompatActivity {
 
     public void requestPermission() {
         Log.d(TAG, "requestPermission");
+        requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_CODE_PERMISSION);
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
+        Log.d(TAG, "permission: " + permissions.toString());
     }
 }

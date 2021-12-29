@@ -44,8 +44,8 @@ public class ResourceManager {
     }
 
     public ThreadPoolManager getThreadPoolManager() {
-        synchronized (mThreadPoolManager) {
-            if (mThreadPoolManager == null) {
+        if (mThreadPoolManager == null) {
+            synchronized (this) {
                 mThreadPoolManager = new ThreadPoolManager();
             }
         }
@@ -53,8 +53,8 @@ public class ResourceManager {
     }
 
     public P2pAdapter getP2pAdapter() {
-        synchronized (mP2pAdapter) {
-            if (mP2pAdapter == null) {
+        if (mP2pAdapter == null) {
+            synchronized (this) {
                 mP2pAdapter = new P2pAdapter(mContext);
             }
         }
@@ -62,8 +62,8 @@ public class ResourceManager {
     }
 
     public AsynchronousManager getAsynchronousManager() {
-        synchronized (mAsynchronousManager) {
-            if (mAsynchronousManager == null) {
+        if (mAsynchronousManager == null) {
+            synchronized (this) {
                 mAsynchronousManager = new AsynchronousManager();
             }
         }
