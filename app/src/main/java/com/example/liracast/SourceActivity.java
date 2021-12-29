@@ -12,6 +12,7 @@ import android.media.projection.MediaProjectionManager;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pGroup;
 import android.net.wifi.p2p.WifiP2pInfo;
+import android.net.wifi.p2p.WifiP2pWfdInfo;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -106,6 +107,15 @@ public class SourceActivity extends AppCompatActivity {
         public void onGroupFinded(WifiP2pGroup wifiP2pGroup) {
 
         }
+
+        private boolean isWFD(int type) {
+            if (type == WifiP2pWfdInfo.DEVICE_TYPE_PRIMARY_SINK ||
+                    type == WifiP2pWfdInfo.DEVICE_TYPE_SECONDARY_SINK ||
+                    type == WifiP2pWfdInfo.DEVICE_TYPE_SOURCE_OR_PRIMARY_SINK) {
+                return true;
+            }
+            return false;
+        }
     };
 
     private ServiceConnection conn = new ServiceConnection() {
@@ -171,10 +181,6 @@ public class SourceActivity extends AppCompatActivity {
         }
         Intent screenCaptureIntent = mediaProjectionManager.createScreenCaptureIntent();
         startActivityForResult(screenCaptureIntent, MEDIAPROJECTION_REQUEST_CODE);
-    }
-
-    private boolean isWFD(int type) {
-        return true;
     }
 
     @Override
