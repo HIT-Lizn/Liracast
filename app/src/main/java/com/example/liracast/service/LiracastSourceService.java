@@ -44,17 +44,40 @@ public class LiracastSourceService extends Service {
     }
 
     private class LiracastSourceServiceStub extends ILiracastSourceService.Stub {
-
         @Override
-        public void startMirror() throws RemoteException {
-            mCastCore.startMirror();
+        public void setListener(ILiracastListener listener) throws RemoteException {
+            mCastCore.setListener(listener);
         }
 
         @Override
-        public void stopMirror() throws RemoteException {
-            mCastCore.stopMirror();
+        public void startSearch() throws RemoteException {
+            mCastCore.startSearch();
         }
 
+        @Override
+        public void stopSearch() throws RemoteException {
+            mCastCore.stopSearch();
+        }
+
+        @Override
+        public void startMirror(DeviceInfo deviceInfo) throws RemoteException {
+            mCastCore.startMirror(deviceInfo);
+        }
+
+        @Override
+        public void stopMirror(DeviceInfo deviceInfo) throws RemoteException {
+            mCastCore.stopMirror(deviceInfo);
+        }
+
+        @Override
+        public void pause(DeviceInfo deviceInfo) throws RemoteException {
+
+        }
+
+        @Override
+        public void resume(DeviceInfo deviceInfo) throws RemoteException {
+
+        }
     }
 
     private void notifyAndStartForeGround() {

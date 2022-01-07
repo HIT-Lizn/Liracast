@@ -14,6 +14,8 @@ import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Looper;
 import android.util.Log;
 
+import com.example.liracast.service.DeviceInfo;
+
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -143,9 +145,9 @@ public class P2pAdapter {
     }
 
     @SuppressLint("MissingPermission")
-    public void connect(WifiP2pDevice device) {
+    public void connect(DeviceInfo device) {
         WifiP2pConfig config = new WifiP2pConfig();
-        config.deviceAddress = device.deviceAddress;
+        config.deviceAddress = device.getAddress();
         config.wps.setup = WpsInfo.PBC;
         mWifiP2pManager.connect(mChannel, config, new WifiP2pManager.ActionListener() {
             @Override

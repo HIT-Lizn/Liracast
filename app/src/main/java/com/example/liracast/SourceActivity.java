@@ -30,6 +30,8 @@ import com.example.liracast.global.Config;
 import com.example.liracast.global.ResourceManager;
 import com.example.liracast.manager.AsynchronousManager;
 import com.example.liracast.net.p2p.P2pListener;
+import com.example.liracast.service.DeviceInfo;
+import com.example.liracast.service.ILiracastListener;
 import com.example.liracast.service.ILiracastSourceService;
 
 import java.util.ArrayList;
@@ -37,35 +39,25 @@ import java.util.List;
 
 public class SourceActivity extends AppCompatActivity {
 
-    private class Device {
-        public String name;
-        public String address;
-
-        public Device(String n, String a) {
-            name = n;
-            address = a;
-        }
-    }
-
-    private class DeviceAdapter extends ArrayAdapter<Device> {
+    private class DeviceAdapter extends ArrayAdapter<DeviceInfo> {
         class ViewHolder {
             TextView name;
             TextView status;
         }
 
-        public DeviceAdapter(Context context, int resource, List<Device> objects) {
+        public DeviceAdapter(Context context, int resource, List<DeviceInfo> objects) {
             super(context, resource, objects);
         }
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            Device device = getItem(position);
+            DeviceInfo device = getItem(position);
             View view = LayoutInflater.from(getContext()).inflate(R.layout.layout_device, parent, false);
             ViewHolder viewHolder = new ViewHolder();
             viewHolder.name = view.findViewById(R.id.device_name);
             viewHolder.status = view.findViewById(R.id.device_status);
-            viewHolder.name.setText(device.name);
-            viewHolder.status.setText(device.address);
+            viewHolder.name.setText(device.getName());
+            viewHolder.status.setText(device.getAddress());
             view.setTag(viewHolder);
             return view;
         }
@@ -74,65 +66,59 @@ public class SourceActivity extends AppCompatActivity {
     private final String TAG = "SourceActivity";
     private final int MEDIAPROJECTION_REQUEST_CODE = 1234;
     private ILiracastSourceService mILiracastSourceService;
-    private List<Device> deviceList = new ArrayList<Device>();
+    private List<DeviceInfo> deviceList = new ArrayList<DeviceInfo>();
     private DeviceAdapter deviceAdapter;
-
-    private P2pListener mP2pListener = new P2pListener() {
-        @Override
-        public void onDeviceSearched(WifiP2pDevice wifiP2pDevice) {
-            if (!isWFD(wifiP2pDevice.getWfdInfo().getDeviceType())) {
-                Log.e(TAG, "not wfd device");
-                return;
-            }
-            for (Device d: deviceList) {
-                if (d.address.equals(wifiP2pDevice.deviceAddress)) {
-                    return;
-                }
-            }
-            deviceList.add(new Device(wifiP2pDevice.deviceName, wifiP2pDevice.deviceAddress));
-            deviceAdapter.notifyDataSetChanged();
-        }
-
-        @Override
-        public void onDeviceConnect(WifiP2pInfo wifiP2pInfo) {
-
-        }
-
-        @Override
-        public void onDeviceDisconnect() {
-
-        }
-
-        @Override
-        public void onGroupFinded(WifiP2pGroup wifiP2pGroup) {
-
-        }
-
-        private boolean isWFD(int type) {
-            if (type == WifiP2pWfdInfo.DEVICE_TYPE_PRIMARY_SINK ||
-                    type == WifiP2pWfdInfo.DEVICE_TYPE_SECONDARY_SINK ||
-                    type == WifiP2pWfdInfo.DEVICE_TYPE_SOURCE_OR_PRIMARY_SINK) {
-                return true;
-            }
-            return false;
-        }
-    };
 
     private ServiceConnection conn = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             Log.d(TAG, "onServiceConnected");
             mILiracastSourceService = ILiracastSourceService.Stub.asInterface(service);
-            /*ResourceManager.getInstance().getAsynchronousManager().postRunnabe(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        mILiracastSourceService.startMirror();
-                    } catch (Exception e) {
-                        Log.e(TAG, e.toString());
+            try {
+                mILiracastSourceService.setListener(new ILiracastListener.Stub() {
+                    @Override
+                    public void onDeviceSearched(DeviceInfo deviceInfo) throws RemoteException {
+                        if (!deviceList.contains(deviceInfo)) {
+                            deviceList.add(deviceInfo);
+                        }
+                        deviceAdapter.notifyDataSetChanged();
                     }
-                }
-            });*/
+
+                    @Override
+                    public void onDeviceConnected(DeviceInfo deviceInfo) throws RemoteException {
+
+                    }
+
+                    @Override
+                    public void onDeviceDisconnected(DeviceInfo deviceInfo) throws RemoteException {
+
+                    }
+
+                    @Override
+                    public void onStart(DeviceInfo deviceInfo) throws RemoteException {
+
+                    }
+
+                    @Override
+                    public void onPause(DeviceInfo deviceInfo) throws RemoteException {
+
+                    }
+
+                    @Override
+                    public void onResume(DeviceInfo deviceInfo) throws RemoteException {
+
+                    }
+
+                    @Override
+                    public void onStop(DeviceInfo deviceInfo) throws RemoteException {
+
+                    }
+                });
+
+                mILiracastSourceService.startSearch();
+            } catch (RemoteException e) {
+                Log.e(TAG, e.toString());
+            }
         }
 
         @Override
@@ -151,25 +137,22 @@ public class SourceActivity extends AppCompatActivity {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Device device = deviceList.get(position);
-                Toast.makeText(SourceActivity.this, "startMirror on " + device.name, Toast.LENGTH_SHORT).show();
+                DeviceInfo device = deviceList.get(position);
+                Toast.makeText(SourceActivity.this, "startMirror on " + device.getName(), Toast.LENGTH_SHORT).show();
+                try {
+                    mILiracastSourceService.startMirror(device);
+                } catch (RemoteException e) {
+                    Log.e(TAG, e.toString());
+                }
             }
         });
 
-        ResourceManager.getInstance().getP2pAdapter().registerListener(mP2pListener);
-        ResourceManager.getInstance().getThreadPoolManager().postRunnable(new Runnable() {
-            @Override
-            public void run() {
-                ResourceManager.getInstance().getP2pAdapter().startSearch();
-            }
-        });
-
-        /*ResourceManager.getInstance().getAsynchronousManager().postRunnabe(new Runnable() {
+        ResourceManager.getInstance().getAsynchronousManager().postRunnabe(new Runnable() {
             @Override
             public void run() {
                 getMediaProjection();
             }
-        });*/
+        });
     }
 
     private void getMediaProjection() {

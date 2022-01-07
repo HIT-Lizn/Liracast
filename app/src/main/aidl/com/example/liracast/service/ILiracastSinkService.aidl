@@ -1,6 +1,6 @@
 package com.example.liracast.service;
-import com.example.liracast.service.Test;
+import com.example.liracast.service.DeviceInfo;
 interface ILiracastSinkService {
-    void start(in Test t);
-    void stop();
+    void start(in DeviceInfo deviceInfo);
+    void stop(in DeviceInfo deviceInfo);
 }
