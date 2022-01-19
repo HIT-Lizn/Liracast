@@ -12,6 +12,7 @@ import com.example.liracast.net.ucp.UDPRecevier;
 import com.example.liracast.net.ucp.UDPSender;
 
 public class LiNetWorkSession {
+    public static final int UDP_REC_DATA = 100;
     private final String TAG = "LiNetWorkSession";
     private Handler mNotify;
     private Handler mHandler;
@@ -42,7 +43,16 @@ public class LiNetWorkSession {
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
-            //To be continue
+            switch (msg.what) {
+                case UDP_REC_DATA:
+                    Message notify = new Message();
+                    notify.obj = msg.obj;
+                    notify.what = -1;
+                    mNotify.sendMessage(notify);
+                    break;
+                default:
+                    ;
+            }
         }
     }
 }
