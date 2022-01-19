@@ -11,6 +11,8 @@ import com.example.liracast.net.tcp.TCPServier;
 import com.example.liracast.net.ucp.UDPRecevier;
 import com.example.liracast.net.ucp.UDPSender;
 
+import java.net.InetAddress;
+
 public class LiNetWorkSession {
     public static final int UDP_REC_DATA = 100;
     private final String TAG = "LiNetWorkSession";
@@ -34,8 +36,35 @@ public class LiNetWorkSession {
         }
     }
 
+    public void UDPStartListen(int port) {
+        if (mUdpRecevier == null) {
+            mUdpRecevier = new UDPRecevier(mHandler);
+        }
+        mUdpRecevier.startListen(port);
+    }
 
-    public class NetWorkSessionHandler extends Handler {
+    public void UDPStopListen() {
+        if (mUdpRecevier == null) {
+            mUdpRecevier = new UDPRecevier(mHandler);
+        }
+        mUdpRecevier.stopListen();
+    }
+
+    public void UDPSetRemote(InetAddress inetAddress, int port) {
+        if (mUdpSender == null) {
+            mUdpSender = new UDPSender(mHandler);
+        }
+        mUdpSender.setRemote(inetAddress, port);
+    }
+
+    public void UDPSendData(byte[] bytes, int length) {
+        if (mUdpSender == null) {
+            mUdpSender = new UDPSender(mHandler);
+        }
+        mUdpSender.sendData(bytes, length);
+    }
+
+    private class NetWorkSessionHandler extends Handler {
         public NetWorkSessionHandler(Looper looper) {
             super(looper);
         }

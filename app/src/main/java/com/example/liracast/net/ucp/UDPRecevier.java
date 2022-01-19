@@ -55,7 +55,7 @@ public class UDPRecevier {
         });
     }
 
-    public void stopListen(int port) {
+    public void stopListen() {
         state = false;
         mDatagramSocket.close();
         mDatagramSocket = null;
